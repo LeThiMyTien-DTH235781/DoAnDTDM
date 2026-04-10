@@ -9,7 +9,6 @@ const NoteSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
 });
 
-// SỬA LỖI TẠI ĐÂY: Thêm 'next' vào tham số của function
 NoteSchema.pre('save', function (next) {
     this.updatedAt = Date.now();
     
