@@ -20,13 +20,14 @@ app.set('trust proxy', 1);
 app.use(session({
     secret: 'ghi-chu-bi-mat',
     resave: false,
-    saveUninitialized: true, // 🔥 QUAN TRỌNG
+    saveUninitialized: true,
     cookie: {
-        secure: false,       // 🔥 chạy được cả local + Render
+        secure: false,
+        httpOnly: true,
+        sameSite: 'lax',
         maxAge: 3600000
     }
 }));
-
 // Middleware kiểm tra quyền truy cập
 const requireLogin = (req, res, next) => {
     if (req.session.loggedIn) {
@@ -108,13 +109,29 @@ app.get('/', requireLogin, async (req, res) => {
 app.post('/add', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
-        await new Note({ title, content, category }).save();
-        res.redirect('/?added=1');
+
+        if (!title || !content) {
+            return res.status(400).send('Thiếu tiêu đề hoặc nội dung');
+        }
+
+        // 🔥 Tạo note mới
+        const newNote = new Note({
+            title: title.trim(),
+            content: content.trim(),
+            category: category || 'Cá nhân',
+            pinned: false,
+            createdAt: new Date()
+        });
+
+        await newNote.save();
+
+        return res.redirect('/?added=1');
+
     } catch (err) {
-        res.status(500).send('Lỗi khi thêm: ' + err.message);
+        console.error('❌ Lỗi thêm ghi chú:', err);
+        return res.status(500).send('Lỗi khi thêm ghi chú: ' + err.message);
     }
 });
-
 // Trang sửa
 app.get('/edit/:id', requireLogin, async (req, res) => {
     try {
