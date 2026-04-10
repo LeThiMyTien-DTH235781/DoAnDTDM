@@ -32,21 +32,39 @@ const requireLogin = (req, res, next) => {
 };
 
 // ── KẾT NỐI MONGODB ───────────────────────────────────
+
+
 const uri = 'mongodb://tiendth235781:tien123@ac-xqexej9-shard-00-01.ozqyrc3.mongodb.net:27017/app?ssl=true&authSource=admin';
+
 mongoose.connect(uri)
+
     .then(() => console.log('✅ Đã kết nối thành công tới MongoDB.'))
+
     .catch(err => console.log('❌ Lỗi kết nối:', err));
 
 // Hàm đếm số lượng ghi chú cho Sidebar
 async function getCounts() {
-    const all = await Note.find();
-    return {
-        'Tất cả':    all.length,
-        'Công việc': all.filter(n => n.category === 'Công việc').length,
-        'Cá nhân':   all.filter(n => n.category === 'Cá nhân').length,
-        'Ý tưởng':   all.filter(n => n.category === 'Ý tưởng').length,
-        'Đã ghim':   all.filter(n => n.pinned).length,
-    };
+    try {
+        // Đếm trực tiếp từ Database (nhanh và nhẹ hơn rất nhiều)
+        const [all, congViec, caNhan, yTuong, daGhim] = await Promise.all([
+            Note.countDocuments({}),
+            Note.countDocuments({ category: 'Công việc' }),
+            Note.countDocuments({ category: 'Cá nhân' }),
+            Note.countDocuments({ category: 'Ý tưởng' }),
+            Note.countDocuments({ pinned: true })
+        ]);
+
+        return {
+            'Tất cả':    all,
+            'Công việc': congViec,
+            'Cá nhân':   caNhan,
+            'Ý tưởng':   yTuong,
+            'Đã ghim':   daGhim,
+        };
+    } catch (error) {
+        console.error("Lỗi đếm số lượng:", error);
+        return { 'Tất cả': 0, 'Công việc': 0, 'Cá nhân': 0, 'Ý tưởng': 0, 'Đã ghim': 0 };
+    }
 }
 
 // ── ROUTES ĐĂNG NHẬP ────────────────────────────────────
