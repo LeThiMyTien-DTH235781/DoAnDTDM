@@ -45,21 +45,7 @@ mongoose.connect(uri)
     .catch(err => console.log('❌ Lỗi kết nối:', err));
 
 // Hàm đếm số lượng ghi chú cho Sidebar
-async function getCounts() {
-    try {
-        // Đếm trực tiếp từ Database, chỉ nhận về con số, không tải toàn bộ dữ liệu
-        const [all, congViec, caNhan, yTuong, daGhim] = await Promise.all([
-            Note.countDocuments({}),
-            Note.countDocuments({ category: 'Công việc' }),
-            Note.countDocuments({ category: 'Cá nhân' }),
-            Note.countDocuments({ category: 'Ý tưởng' }),
-            Note.countDocuments({ pinned: true })
-        ]);
-        return { 'Tất cả': all, 'Công việc': congViec, 'Cá nhân': caNhan, 'Ý tưởng': yTuong, 'Đã ghim': daGhim };
-    } catch (e) {
-        return { 'Tất cả': 0, 'Công việc': 0, 'Cá nhân': 0, 'Ý tưởng': 0, 'Đã ghim': 0 };
-    }
-}
+
 // ── ROUTES ĐĂNG NHẬP ────────────────────────────────────
 
 app.get('/login', (req, res) => {
@@ -84,11 +70,14 @@ app.get('/logout', (req, res) => {
 // ── ROUTES GHI CHÚ ───────────────────────────────────────
 
 // Trang chủ (Có tìm kiếm & Lọc)
+// TRANG CHỦ: Đã bỏ hoàn toàn phần đếm số lượng
 app.get('/', requireLogin, async (req, res) => {
     try {
         const cat = (req.query.cat || 'Tất cả').trim();
         const search = (req.query.search || '').trim();
-        const counts = await getCounts();
+        
+        // Gửi object counts rỗng để file EJS không bị lỗi biến
+        const counts = {}; 
         
         let query = {};
         if (cat === 'Đã ghim') query.pinned = true;
@@ -101,24 +90,20 @@ app.get('/', requireLogin, async (req, res) => {
             ];
         }
 
+        // Chỉ tập trung lấy danh sách ghi chú
         const notes = await Note.find(query).sort({ pinned: -1, createdAt: -1 });
-        // Đã sửa lỗi "a'index'" ở đây:
+        
         res.render('index', { notes, counts, currentCat: cat, searchQuery: search });
     } catch (err) { 
         res.status(500).send('Lỗi Server: ' + err.message); 
     }
 });
-
-// Thêm ghi chú
+// Thêm ghi chú 
 app.post('/add', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
+        if (!title || !content) return res.status(400).send('Thiếu tiêu đề hoặc nội dung');
 
-        if (!title || !content) {
-            return res.status(400).send('Thiếu tiêu đề hoặc nội dung');
-        }
-
-        // 🔥 Tạo note mới
         const newNote = new Note({
             title: title.trim(),
             content: content.trim(),
@@ -128,25 +113,23 @@ app.post('/add', requireLogin, async (req, res) => {
         });
 
         await newNote.save();
-
-        return res.redirect('/?added=1');
-
+        res.redirect('/?added=1');
     } catch (err) {
-        console.error('❌ Lỗi thêm ghi chú:', err);
-        return res.status(500).send('Lỗi khi thêm ghi chú: ' + err.message);
+        res.status(500).send('Lỗi khi thêm ghi chú: ' + err.message);
     }
 });
-// Trang sửa
+
+// Trang sửa 
 app.get('/edit/:id', requireLogin, async (req, res) => {
     try {
         const note = await Note.findById(req.params.id.trim());
-        const counts = await getCounts();
+        const counts = { 'Tất cả': 0, 'Công việc': 0, 'Cá nhân': 0, 'Ý tưởng': 0, 'Đã ghim': 0 };
         if (!note) return res.redirect('/');
         res.render('edit', { note, counts, currentCat: 'Tất cả', searchQuery: '' });
     } catch (err) { res.redirect('/'); }
 });
 
-// Lưu dữ liệu sửa
+// Lưu dữ liệu sửa (Giữ nguyên logic của bạn)
 app.post('/edit/:id', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
@@ -155,7 +138,7 @@ app.post('/edit/:id', requireLogin, async (req, res) => {
     } catch (err) { res.status(500).send('Lỗi cập nhật'); }
 });
 
-// Bật/Tắt ghim
+// Bật/Tắt ghim 
 app.get('/pin/:id', requireLogin, async (req, res) => {
     try {
         const id = req.params.id.trim();
@@ -170,7 +153,7 @@ app.get('/pin/:id', requireLogin, async (req, res) => {
     }
 });
 
-// Xóa ghi chú
+// Xóa ghi chú 
 app.get('/delete/:id', requireLogin, async (req, res) => {
     try {
         const id = req.params.id.trim();
@@ -182,7 +165,6 @@ app.get('/delete/:id', requireLogin, async (req, res) => {
         res.status(500).send('Lỗi khi xóa');
     }
 });
-
 // KHỞI CHẠY SERVER
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

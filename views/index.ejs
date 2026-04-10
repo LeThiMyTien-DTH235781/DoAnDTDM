@@ -111,29 +111,24 @@
         NoteCute
     </div>
 
-    <div class="nav-label">Danh mục</div>
-    <a href="/?cat=Tất cả" class="nav-item <%= currentCat === 'Tất cả' ? 'active' : '' %>">
-        <div class="nav-left"><i data-lucide="layout-grid" size="15"></i> Tất cả</div>
-        <span class="badge"><%= counts['Tất cả'] %></span>
-    </a>
-    <a href="/?cat=Công việc" class="nav-item <%= currentCat === 'Công việc' ? 'active' : '' %>">
-        <div class="nav-left"><i data-lucide="briefcase" size="15"></i> Công việc</div>
-        <span class="badge"><%= counts['Công việc'] %></span>
-    </a>
-    <a href="/?cat=Cá nhân" class="nav-item <%= currentCat === 'Cá nhân' ? 'active' : '' %>">
-        <div class="nav-left"><i data-lucide="heart" size="15"></i> Cá nhân</div>
-        <span class="badge"><%= counts['Cá nhân'] %></span>
-    </a>
-    <a href="/?cat=Ý tưởng" class="nav-item <%= currentCat === 'Ý tưởng' ? 'active' : '' %>">
-        <div class="nav-left"><i data-lucide="lightbulb" size="15"></i> Ý tưởng</div>
-        <span class="badge"><%= counts['Ý tưởng'] %></span>
-    </a>
+		<div class="nav-label">Danh mục</div>
+		<a href="/?cat=Tất cả" class="nav-item <%= currentCat === 'Tất cả' ? 'active' : '' %>">
+			<div class="nav-left"><i data-lucide="layout-grid" size="15"></i> Tất cả</div>
+		</a>
+		<a href="/?cat=Công việc" class="nav-item <%= currentCat === 'Công việc' ? 'active' : '' %>">
+			<div class="nav-left"><i data-lucide="briefcase" size="15"></i> Công việc</div>
+		</a>
+		<a href="/?cat=Cá nhân" class="nav-item <%= currentCat === 'Cá nhân' ? 'active' : '' %>">
+			<div class="nav-left"><i data-lucide="heart" size="15"></i> Cá nhân</div>
+		</a>
+		<a href="/?cat=Ý tưởng" class="nav-item <%= currentCat === 'Ý tưởng' ? 'active' : '' %>">
+			<div class="nav-left"><i data-lucide="lightbulb" size="15"></i> Ý tưởng</div>
+		</a>
 
-    <div class="nav-label">Bộ lọc</div>
-    <a href="/?cat=Đã ghim" class="nav-item <%= currentCat === 'Đã ghim' ? 'active' : '' %>">
-        <div class="nav-left"><i data-lucide="pin" size="15"></i> Đã ghim</div>
-        <span class="badge"><%= counts['Đã ghim'] %></span>
-    </a>
+		<div class="nav-label">Bộ lọc</div>
+		<a href="/?cat=Đã ghim" class="nav-item <%= currentCat === 'Đã ghim' ? 'active' : '' %>">
+			<div class="nav-left"><i data-lucide="pin" size="15"></i> Đã ghim</div>
+		</a>
 
     <div class="nav-label" style="margin-top: auto;">Hệ thống</div>
     <a href="/logout" class="nav-item" style="color: #ef4444;" onclick="return confirm('Bạn muốn đăng xuất à?')">
@@ -182,7 +177,7 @@
     <div class="grid">
         <% if (notes.length === 0) { %>
             <div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 40px;">
-                <p>Hổng có ghi chú nào hết má ơi!</p>
+                <p>Hổng có ghi chú nào hết!</p>
             </div>
         <% } %>
 
