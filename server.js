@@ -121,7 +121,7 @@ app.get('/', requireLogin, async (req, res) => {
             query.$or = [{ title: { $regex: search, $options: 'i' } }, { content: { $regex: search, $options: 'i' } }];
         }
         const notes = await Note.find(query).sort({ pinned: -1, createdAt: -1 });
-        res.render('index', { notes, counts, currentCat: cat, searchQuery: search });
+        res.render(a'index', { notes, counts, currentCat: cat, searchQuery: search });
     } catch (err) { res.status(500).send('Lỗi Server'); }
 });
 // TRANG CHỦ & TÌM KIẾM
