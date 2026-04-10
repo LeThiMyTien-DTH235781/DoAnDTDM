@@ -39,15 +39,21 @@ const requireLogin = (req, res, next) => {
 };
 
 // ── KẾT NỐI MONGODB ───────────────────────────────────
-// Thêm dòng này để lệnh Thêm/Ghim không bị treo (load mãi)
+// ── KẾT NỐI MONGODB (SỬA ĐỂ HẾT LỖI CANNOT CALL FIND) ──
 mongoose.set('bufferCommands', false);
 
 const uri = process.env.MONGODB_URI || 'mongodb://tiendth235781:tien123@ac-xqexej9-shard-00-01.ozqyrc3.mongodb.net:27017/app?ssl=true&authSource=admin';
 
-mongoose.connect(uri)
-    .then(() => console.log('✅ Đã kết nối thành công tới MongoDB.'))
-    .catch(err => console.log('❌ Lỗi kết nối:', err.message));
-// ĐÃ XÓA DẤU }); THỪA TẠI ĐÂY
+async function connectDB() {
+    try {
+        await mongoose.connect(uri);
+        console.log('✅ Đã kết nối thành công tới MongoDB.');
+    } catch (err) {
+        console.log('❌ Lỗi kết nối:', err.message);
+    }
+}
+
+connectDB(); // Gọi hàm kết nối
 
 // ── ROUTES ĐĂNG NHẬP ────────────────────────────────────
 
