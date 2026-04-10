@@ -15,11 +15,16 @@ app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
 // Cấu hình Session
+app.set('trust proxy', 1);
+
 app.use(session({
     secret: 'ghi-chu-bi-mat',
     resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 3600000 } // 1 hour
+    saveUninitialized: true, // 🔥 QUAN TRỌNG
+    cookie: {
+        secure: false,       // 🔥 chạy được cả local + Render
+        maxAge: 3600000
+    }
 }));
 
 // Middleware kiểm tra quyền truy cập
@@ -30,6 +35,7 @@ const requireLogin = (req, res, next) => {
         res.redirect('/login');
     }
 };
+
 
 // ── KẾT NỐI MONGODB ───────────────────────────────────
 const uri = 'mongodb://tiendth235781:tien123@ac-xqexej9-shard-00-01.ozqyrc3.mongodb.net:27017/app?ssl=true&authSource=admin';
