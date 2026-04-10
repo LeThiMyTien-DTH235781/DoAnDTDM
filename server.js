@@ -39,10 +39,14 @@ const requireLogin = (req, res, next) => {
 
 
 // ── KẾT NỐI MONGODB ───────────────────────────────────
-const uri = 'mongodb://tiendth235781:tien123@ac-xqexej9-shard-00-01.ozqyrc3.mongodb.net:27017/app?ssl=true&authSource=admin';
+// ── KẾT NỐI MONGODB (GIỮ NGUYÊN URI BẠN CHỌN) ──────────
+// Nếu có biến MONGODB_URI (trên Render) thì dùng, không thì dùng chuỗi có cổng (ở nhà)
+const uri = process.env.MONGODB_URI || 'mongodb://tiendth235781:tien123@ac-xqexej9-shard-00-01.ozqyrc3.mongodb.net:27017/app?ssl=true&authSource=admin';
+
 mongoose.connect(uri)
     .then(() => console.log('✅ Đã kết nối thành công tới MongoDB.'))
-    .catch(err => console.log('❌ Lỗi kết nối:', err));
+    .catch(err => console.log('❌ Lỗi kết nối:', err.message));
+});
 
 // Hàm đếm số lượng ghi chú cho Sidebar
 
@@ -165,8 +169,13 @@ app.get('/delete/:id', requireLogin, async (req, res) => {
         res.status(500).send('Lỗi khi xóa');
     }
 });
-// KHỞI CHẠY SERVER
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server đang chạy tại: http://127.0.0.1:${PORT}`);
+// Sử dụng biến môi trường PORT của Render, mặc định là 10000 hoặc 3000 ở nhà
+const PORT = process.env.PORT || 3000; 
+
+// QUAN TRỌNG: Phải dùng '0.0.0.0' thay vì '127.0.0.1' để Render nhận diện được khách từ internet
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server đang chạy tại: http://0.0.0.0:${PORT}`);
 });
+
+// Thêm dòng này để nút Thêm/Ghim không bị xoay vòng nếu kết nối chậm
+mongoose.set('bufferCommands', false);
