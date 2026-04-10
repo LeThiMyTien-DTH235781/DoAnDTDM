@@ -28,6 +28,7 @@ app.use(session({
         maxAge: 3600000
     }
 }));
+
 // Middleware kiểm tra quyền truy cập
 const requireLogin = (req, res, next) => {
     if (req.session.loggedIn) {
@@ -37,18 +38,16 @@ const requireLogin = (req, res, next) => {
     }
 };
 
-
 // ── KẾT NỐI MONGODB ───────────────────────────────────
-// ── KẾT NỐI MONGODB (GIỮ NGUYÊN URI BẠN CHỌN) ──────────
-// Nếu có biến MONGODB_URI (trên Render) thì dùng, không thì dùng chuỗi có cổng (ở nhà)
+// Thêm dòng này để lệnh Thêm/Ghim không bị treo (load mãi)
+mongoose.set('bufferCommands', false);
+
 const uri = process.env.MONGODB_URI || 'mongodb://tiendth235781:tien123@ac-xqexej9-shard-00-01.ozqyrc3.mongodb.net:27017/app?ssl=true&authSource=admin';
 
 mongoose.connect(uri)
     .then(() => console.log('✅ Đã kết nối thành công tới MongoDB.'))
     .catch(err => console.log('❌ Lỗi kết nối:', err.message));
-});
-
-// Hàm đếm số lượng ghi chú cho Sidebar
+// ĐÃ XÓA DẤU }); THỪA TẠI ĐÂY
 
 // ── ROUTES ĐĂNG NHẬP ────────────────────────────────────
 
@@ -73,15 +72,13 @@ app.get('/logout', (req, res) => {
 
 // ── ROUTES GHI CHÚ ───────────────────────────────────────
 
-// Trang chủ (Có tìm kiếm & Lọc)
-// TRANG CHỦ: Đã bỏ hoàn toàn phần đếm số lượng
 app.get('/', requireLogin, async (req, res) => {
     try {
         const cat = (req.query.cat || 'Tất cả').trim();
         const search = (req.query.search || '').trim();
         
-        // Gửi object counts rỗng để file EJS không bị lỗi biến
-        const counts = {}; 
+        // Đã thêm đầy đủ các key để file EJS của bạn chạy được sidebar
+        const counts = { 'Tất cả': 0, 'Công việc': 0, 'Cá nhân': 0, 'Ý tưởng': 0, 'Đã ghim': 0 }; 
         
         let query = {};
         if (cat === 'Đã ghim') query.pinned = true;
@@ -94,7 +91,6 @@ app.get('/', requireLogin, async (req, res) => {
             ];
         }
 
-        // Chỉ tập trung lấy danh sách ghi chú
         const notes = await Note.find(query).sort({ pinned: -1, createdAt: -1 });
         
         res.render('index', { notes, counts, currentCat: cat, searchQuery: search });
@@ -102,7 +98,7 @@ app.get('/', requireLogin, async (req, res) => {
         res.status(500).send('Lỗi Server: ' + err.message); 
     }
 });
-// Thêm ghi chú 
+
 app.post('/add', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
@@ -123,7 +119,6 @@ app.post('/add', requireLogin, async (req, res) => {
     }
 });
 
-// Trang sửa 
 app.get('/edit/:id', requireLogin, async (req, res) => {
     try {
         const note = await Note.findById(req.params.id.trim());
@@ -133,7 +128,6 @@ app.get('/edit/:id', requireLogin, async (req, res) => {
     } catch (err) { res.redirect('/'); }
 });
 
-// Lưu dữ liệu sửa (Giữ nguyên logic của bạn)
 app.post('/edit/:id', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
@@ -142,7 +136,6 @@ app.post('/edit/:id', requireLogin, async (req, res) => {
     } catch (err) { res.status(500).send('Lỗi cập nhật'); }
 });
 
-// Bật/Tắt ghim 
 app.get('/pin/:id', requireLogin, async (req, res) => {
     try {
         const id = req.params.id.trim();
@@ -157,7 +150,6 @@ app.get('/pin/:id', requireLogin, async (req, res) => {
     }
 });
 
-// Xóa ghi chú 
 app.get('/delete/:id', requireLogin, async (req, res) => {
     try {
         const id = req.params.id.trim();
@@ -169,13 +161,9 @@ app.get('/delete/:id', requireLogin, async (req, res) => {
         res.status(500).send('Lỗi khi xóa');
     }
 });
-// Sử dụng biến môi trường PORT của Render, mặc định là 10000 hoặc 3000 ở nhà
+
 const PORT = process.env.PORT || 3000; 
 
-// QUAN TRỌNG: Phải dùng '0.0.0.0' thay vì '127.0.0.1' để Render nhận diện được khách từ internet
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server đang chạy tại: http://0.0.0.0:${PORT}`);
 });
-
-// Thêm dòng này để nút Thêm/Ghim không bị xoay vòng nếu kết nối chậm
-mongoose.set('bufferCommands', false);
