@@ -46,16 +46,20 @@ mongoose.connect(uri)
 
 // Hàm đếm số lượng ghi chú cho Sidebar
 async function getCounts() {
-    const all = await Note.find();
-    return {
-        'Tất cả':    all.length,
-        'Công việc': all.filter(n => n.category === 'Công việc').length,
-        'Cá nhân':   all.filter(n => n.category === 'Cá nhân').length,
-        'Ý tưởng':   all.filter(n => n.category === 'Ý tưởng').length,
-        'Đã ghim':   all.filter(n => n.pinned).length,
-    };
+    try {
+        // Đếm trực tiếp từ Database, chỉ nhận về con số, không tải toàn bộ dữ liệu
+        const [all, congViec, caNhan, yTuong, daGhim] = await Promise.all([
+            Note.countDocuments({}),
+            Note.countDocuments({ category: 'Công việc' }),
+            Note.countDocuments({ category: 'Cá nhân' }),
+            Note.countDocuments({ category: 'Ý tưởng' }),
+            Note.countDocuments({ pinned: true })
+        ]);
+        return { 'Tất cả': all, 'Công việc': congViec, 'Cá nhân': caNhan, 'Ý tưởng': yTuong, 'Đã ghim': daGhim };
+    } catch (e) {
+        return { 'Tất cả': 0, 'Công việc': 0, 'Cá nhân': 0, 'Ý tưởng': 0, 'Đã ghim': 0 };
+    }
 }
-
 // ── ROUTES ĐĂNG NHẬP ────────────────────────────────────
 
 app.get('/login', (req, res) => {
