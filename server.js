@@ -65,23 +65,14 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
+    app.post('/login', (req, res) => {
     const { username, password } = req.body;
+
     if (username === 'admin' && password === '123456') {
         req.session.loggedIn = true;
-        return res.redirect('/'); // ✅ bỏ session.save
+        return res.redirect('/');
     } else {
-        res.render('login', { error: 'Sai tài khoản hoặc mật khẩu!' });
-    }
-});
-    const { username, password } = req.body;
-    if (username === 'admin' && password === '123456') {
-        req.session.loggedIn = true;
-        req.session.save((err) => {
-            if (err) console.log(err);
-            res.redirect('/');
-        });
-    } else {
-        res.render('login', { error: 'Sai tài khoản hoặc mật khẩu!' });
+        return res.render('login', { error: 'Sai tài khoản hoặc mật khẩu!' });
     }
 });
 
