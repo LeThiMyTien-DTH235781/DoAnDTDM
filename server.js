@@ -7,7 +7,6 @@ require('dotenv').config();
 const app = express();
 const Note = require('./models/Note');
 
-// ── MIDDLEWARE ──────────────────────────────────────────
 app.set('trust proxy', 1);
 
 app.use(cors());
@@ -18,7 +17,7 @@ app.set('view engine', 'ejs');
 
 app.use(session({
     secret: process.env.SESSION_SECRET || 'ghi-chu-bi-mat',
-    resave: false,
+    resave: true,
     saveUninitialized: true,
     cookie: {
         secure: process.env.NODE_ENV === 'production',
@@ -27,7 +26,6 @@ app.use(session({
     }
 }));
 
-// Middleware kiểm tra quyền truy cập
 const requireLogin = (req, res, next) => {
     if (req.session.loggedIn) {
         next();
@@ -36,13 +34,11 @@ const requireLogin = (req, res, next) => {
     }
 };
 
-// ── KẾT NỐI MONGODB ───────────────────────────────────
 const uri = process.env.MONGO_URI || 'mongodb://tiendth235781:tien123@ac-xqexej9-shard-00-01.ozqyrc3.mongodb.net:27017/app?ssl=true&authSource=admin';
 mongoose.connect(uri)
     .then(() => console.log('✅ Đã kết nối thành công tới MongoDB.'))
     .catch(err => console.log('❌ Lỗi kết nối:', err));
 
-// Hàm đếm số lượng ghi chú cho Sidebar
 async function getCounts() {
     try {
         const [all, congViec, caNhan, yTuong, daGhim] = await Promise.all([
@@ -64,8 +60,6 @@ async function getCounts() {
     }
 }
 
-// ── ROUTES ĐĂNG NHẬP ────────────────────────────────────
-
 app.get('/login', (req, res) => {
     res.render('login', { error: null });
 });
@@ -74,7 +68,6 @@ app.post('/login', (req, res) => {
     const { username, password } = req.body;
     if (username === 'admin' && password === '123456') {
         req.session.loggedIn = true;
-        // ✅ Save session trước khi redirect
         req.session.save((err) => {
             if (err) console.log(err);
             res.redirect('/');
@@ -83,12 +76,11 @@ app.post('/login', (req, res) => {
         res.render('login', { error: 'Sai tài khoản hoặc mật khẩu!' });
     }
 });
+
 app.get('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/login');
 });
-
-// ── ROUTES GHI CHÚ ───────────────────────────────────────
 
 app.get('/', requireLogin, async (req, res) => {
     try {
@@ -118,7 +110,6 @@ app.post('/add', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
         await new Note({ title, content, category }).save();
-        // ✅ Save session trước khi redirect
         req.session.save((err) => {
             if (err) console.log(err);
             res.redirect('/?added=1');
@@ -141,7 +132,10 @@ app.post('/edit/:id', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
         await Note.findByIdAndUpdate(req.params.id.trim(), { title, content, category });
-        res.redirect('/?edited=1');
+        req.session.save((err) => {
+            if (err) console.log(err);
+            res.redirect('/?edited=1');
+        });
     } catch (err) { res.status(500).send('Lỗi cập nhật'); }
 });
 
@@ -153,7 +147,10 @@ app.get('/pin/:id', requireLogin, async (req, res) => {
             note.pinned = !note.pinned;
             await note.save();
         }
-        res.redirect('/?pinned=1');
+        req.session.save((err) => {
+            if (err) console.log(err);
+            res.redirect('/?pinned=1');
+        });
     } catch (err) {
         res.status(500).send('Lỗi ghim');
     }
@@ -165,13 +162,15 @@ app.get('/delete/:id', requireLogin, async (req, res) => {
         if (mongoose.Types.ObjectId.isValid(id)) {
             await Note.findByIdAndDelete(id);
         }
-        res.redirect('/?deleted=1');
+        req.session.save((err) => {
+            if (err) console.log(err);
+            res.redirect('/?deleted=1');
+        });
     } catch (err) {
         res.status(500).send('Lỗi khi xóa');
     }
 });
 
-// ── KHỞI CHẠY SERVER ──────────────────────────────────
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server đang chạy tại cổng: ${PORT}`);
