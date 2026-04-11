@@ -68,6 +68,14 @@ app.post('/login', (req, res) => {
     const { username, password } = req.body;
     if (username === 'admin' && password === '123456') {
         req.session.loggedIn = true;
+        return res.redirect('/'); // ✅ bỏ session.save
+    } else {
+        res.render('login', { error: 'Sai tài khoản hoặc mật khẩu!' });
+    }
+});
+    const { username, password } = req.body;
+    if (username === 'admin' && password === '123456') {
+        req.session.loggedIn = true;
         req.session.save((err) => {
             if (err) console.log(err);
             res.redirect('/');
@@ -113,12 +121,12 @@ app.get('/add', requireLogin, (req, res) => {
 app.post('/add', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
+
         await new Note({ title, content, category }).save();
-        req.session.save((err) => {
-            if (err) console.log(err);
-            res.redirect('/?added=1');
-        });
+
+        return res.redirect('/?added=1'); // ✅ sửa ở đây
     } catch (err) {
+        console.error(err);
         res.status(500).send('Lỗi khi thêm: ' + err.message);
     }
 });
@@ -135,26 +143,30 @@ app.get('/edit/:id', requireLogin, async (req, res) => {
 app.post('/edit/:id', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
-        await Note.findByIdAndUpdate(req.params.id.trim(), { title, content, category });
-        req.session.save((err) => {
-            if (err) console.log(err);
-            res.redirect('/?edited=1');
+
+        await Note.findByIdAndUpdate(req.params.id.trim(), {
+            title,
+            content,
+            category
         });
-    } catch (err) { res.status(500).send('Lỗi cập nhật'); }
+
+        return res.redirect('/?edited=1'); // ✅ sửa
+    } catch (err) {
+        res.status(500).send('Lỗi cập nhật');
+    }
 });
 
 app.get('/pin/:id', requireLogin, async (req, res) => {
     try {
         const id = req.params.id.trim();
         const note = await Note.findById(id);
+
         if (note) {
             note.pinned = !note.pinned;
             await note.save();
         }
-        req.session.save((err) => {
-            if (err) console.log(err);
-            res.redirect('/?pinned=1');
-        });
+
+        return res.redirect('/?pinned=1'); // ✅ sửa
     } catch (err) {
         res.status(500).send('Lỗi ghim');
     }
@@ -163,13 +175,12 @@ app.get('/pin/:id', requireLogin, async (req, res) => {
 app.get('/delete/:id', requireLogin, async (req, res) => {
     try {
         const id = req.params.id.trim();
+
         if (mongoose.Types.ObjectId.isValid(id)) {
             await Note.findByIdAndDelete(id);
         }
-        req.session.save((err) => {
-            if (err) console.log(err);
-            res.redirect('/?deleted=1');
-        });
+
+        return res.redirect('/?deleted=1'); // ✅ sửa
     } catch (err) {
         res.status(500).send('Lỗi khi xóa');
     }
