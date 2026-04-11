@@ -36,8 +36,17 @@ const requireLogin = (req, res, next) => {
 
 const uri = process.env.MONGO_URI || 'mongodb://tiendth235781:tien123@ac-xqexej9-shard-00-01.ozqyrc3.mongodb.net:27017/app?ssl=true&authSource=admin';
 mongoose.connect(uri)
-    .then(() => console.log('✅ Đã kết nối thành công tới MongoDB.'))
-    .catch(err => console.log('❌ Lỗi kết nối:', err));
+    .then(() => {
+        console.log('✅ Đã kết nối MongoDB');
+
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`🚀 Server chạy cổng: ${PORT}`);
+        });
+    })
+    .catch(err => {
+        console.error('❌ MongoDB lỗi:', err);
+        process.exit(1);
+    });
 
 async function getCounts() {
     try {
