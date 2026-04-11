@@ -8,7 +8,7 @@ require('dotenv').config();
 const app = express();
 const Note = require('./models/Note');
 
-// Cấu hình
+// --- CẤU HÌNH HỆ THỐNG ---
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -17,26 +17,25 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.set('trust proxy', 1);
 
-// Cấu hình Session (Sửa secure thành false để chạy được trên localhost)
+// Cấu hình Session tối ưu cho môi trường Production (Vercel)
 app.use(session({
     secret: process.env.SESSION_SECRET || 'secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false, // Để false khi chạy http (localhost)
+        // Tự động bật secure khi chạy trên HTTPS của Vercel
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
         maxAge: 3600000 
     }
 }));
 
-
-
-// Middleware bảo mật
+// --- MIDDLEWARE ---
 const requireLogin = (req, res, next) => {
     if (req.session.loggedIn) return next();
     res.redirect('/login');
 };
 
-// Hàm đếm số lượng
 async function getCounts() {
     try {
         const [all, work, personal, idea, pinned] = await Promise.all([
@@ -73,18 +72,12 @@ app.get('/', requireLogin, async (req, res) => {
         const cat = req.query.cat || 'Tất cả';
         const search = req.query.search || '';
         const counts = await getCounts();
-
         let query = {};
         if (cat === 'Đã ghim') query.pinned = true;
         else if (cat !== 'Tất cả') query.category = cat;
-
         if (search) {
-            query.$or = [
-                { title: { $regex: search, $options: 'i' } },
-                { content: { $regex: search, $options: 'i' } }
-            ];
+            query.$or = [{ title: { $regex: search, $options: 'i' } }, { content: { $regex: search, $options: 'i' } }];
         }
-
         const notes = await Note.find(query).sort({ pinned: -1, createdAt: -1 });
         res.render('index', { notes, counts, currentCat: cat, searchQuery: search });
     } catch (err) { res.status(500).send(err.message); }
@@ -122,13 +115,19 @@ app.get('/delete/:id', requireLogin, async (req, res) => {
     res.redirect('/?deleted=1');
 });
 
-// Khởi chạy
+// --- KẾT NỐI DB & KHỞI CHẠY ---
 const PORT = process.env.PORT || 3000;
+
+// Kết nối DB (Vercel sẽ tái sử dụng kết nối này)
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
-        console.log('✅ MongoDB Connected');
-        app.listen(PORT, () => console.log(`🚀 http://localhost:${PORT}`));
+        console.log('✅ Đã kết nối tới MongoDB');
+        // Chỉ chạy app.listen nếu KHÔNG phải môi trường Vercel
+        if (process.env.NODE_ENV !== 'production') {
+            app.listen(PORT, () => console.log(`🚀 http://localhost:${PORT}`));
+        }
     })
     .catch(err => console.error('❌ DB Error:', err));
-	
+
+// Dòng này cực kỳ quan trọng cho Vercel
 module.exports = app;
