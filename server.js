@@ -2,74 +2,64 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const session = require('express-session');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
 const Note = require('./models/Note');
 
-app.set('trust proxy', 1);
-
-app.use(cors());
+// Cấu hình
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
-app.set('view engine', 'ejs');
+app.use(cors());
+app.set('trust proxy', 1);
 
+// Cấu hình Session (Sửa secure thành false để chạy được trên localhost)
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'ghi-chu-bi-mat',
-    resave: true,
-    saveUninitialized: true,
+    secret: process.env.SESSION_SECRET || 'secret-key',
+    resave: false,
+    saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        maxAge: 3600000
+        secure: false, // Để false khi chạy http (localhost)
+        maxAge: 3600000 
     }
 }));
+module.exports = app;
 
+
+// Middleware bảo mật
 const requireLogin = (req, res, next) => {
-    if (req.session.loggedIn) {
-        next();
-    } else {
-        res.redirect('/login');
-    }
+    if (req.session.loggedIn) return next();
+    res.redirect('/login');
 };
 
-const uri = process.env.MONGO_URI || 'mongodb://tiendth235781:tien123@ac-xqexej9-shard-00-01.ozqyrc3.mongodb.net:27017/app?ssl=true&authSource=admin';
-
-
+// Hàm đếm số lượng
 async function getCounts() {
     try {
-        const [all, congViec, caNhan, yTuong, daGhim] = await Promise.all([
+        const [all, work, personal, idea, pinned] = await Promise.all([
             Note.countDocuments({}),
             Note.countDocuments({ category: 'Công việc' }),
             Note.countDocuments({ category: 'Cá nhân' }),
             Note.countDocuments({ category: 'Ý tưởng' }),
             Note.countDocuments({ pinned: true }),
         ]);
-        return {
-            'Tất cả':    all,
-            'Công việc': congViec,
-            'Cá nhân':   caNhan,
-            'Ý tưởng':   yTuong,
-            'Đã ghim':   daGhim,
-        };
-    } catch (err) {
-        return { 'Tất cả': 0, 'Công việc': 0, 'Cá nhân': 0, 'Ý tưởng': 0, 'Đã ghim': 0 };
-    }
+        return { 'Tất cả': all, 'Công việc': work, 'Cá nhân': personal, 'Ý tưởng': idea, 'Đã ghim': pinned };
+    } catch (e) { return {}; }
 }
 
-app.get('/login', (req, res) => {
-    res.render('login', { error: null });
-});
+// --- ROUTES ---
+app.get('/login', (req, res) => res.render('login', { error: null }));
 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
-
     if (username === 'admin' && password === '123456') {
         req.session.loggedIn = true;
-        return res.redirect('/');
+        res.redirect('/');
     } else {
-        return res.render('login', { error: 'Sai tài khoản hoặc mật khẩu!' });
+        res.render('login', { error: 'Sai tài khoản hoặc mật khẩu!' });
     }
 });
 
@@ -80,8 +70,8 @@ app.get('/logout', (req, res) => {
 
 app.get('/', requireLogin, async (req, res) => {
     try {
-        const cat = (req.query.cat || 'Tất cả').trim();
-        const search = (req.query.search || '').trim();
+        const cat = req.query.cat || 'Tất cả';
+        const search = req.query.search || '';
         const counts = await getCounts();
 
         let query = {};
@@ -97,94 +87,46 @@ app.get('/', requireLogin, async (req, res) => {
 
         const notes = await Note.find(query).sort({ pinned: -1, createdAt: -1 });
         res.render('index', { notes, counts, currentCat: cat, searchQuery: search });
-    } catch (err) {
-        res.status(500).send('Lỗi Server: ' + err.message);
-    }
-});
-
-app.get('/add', requireLogin, (req, res) => {
-    res.render('add'); // tạo file views/add.ejs
+    } catch (err) { res.status(500).send(err.message); }
 });
 
 app.post('/add', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
-
         await new Note({ title, content, category }).save();
-
-        return res.redirect('/?added=1'); // ✅ sửa ở đây
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Lỗi khi thêm: ' + err.message);
-    }
+        res.redirect('/?added=1');
+    } catch (err) { res.redirect('/'); }
 });
 
 app.get('/edit/:id', requireLogin, async (req, res) => {
-    try {
-        const note = await Note.findById(req.params.id.trim());
-        const counts = await getCounts();
-        if (!note) return res.redirect('/');
-        res.render('edit', { note, counts, currentCat: 'Tất cả', searchQuery: '' });
-    } catch (err) { res.redirect('/'); }
+    const note = await Note.findById(req.params.id);
+    res.render('edit', { note });
 });
 
 app.post('/edit/:id', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
-
-        await Note.findByIdAndUpdate(req.params.id.trim(), {
-            title,
-            content,
-            category
-        });
-
-        return res.redirect('/?edited=1'); // ✅ sửa
-    } catch (err) {
-        res.status(500).send('Lỗi cập nhật');
-    }
+        await Note.findByIdAndUpdate(req.params.id, { title, content, category });
+        res.redirect('/?edited=1');
+    } catch (err) { res.redirect('/'); }
 });
 
 app.get('/pin/:id', requireLogin, async (req, res) => {
-    try {
-        const id = req.params.id.trim();
-        const note = await Note.findById(id);
-
-        if (note) {
-            note.pinned = !note.pinned;
-            await note.save();
-        }
-
-        return res.redirect('/?pinned=1'); // ✅ sửa
-    } catch (err) {
-        res.status(500).send('Lỗi ghim');
-    }
+    const note = await Note.findById(req.params.id);
+    if (note) { note.pinned = !note.pinned; await note.save(); }
+    res.redirect('back');
 });
 
 app.get('/delete/:id', requireLogin, async (req, res) => {
-    try {
-        const id = req.params.id.trim();
-
-        if (mongoose.Types.ObjectId.isValid(id)) {
-            await Note.findByIdAndDelete(id);
-        }
-
-        return res.redirect('/?deleted=1'); // ✅ sửa
-    } catch (err) {
-        res.status(500).send('Lỗi khi xóa');
-    }
+    await Note.findByIdAndDelete(req.params.id);
+    res.redirect('/?deleted=1');
 });
 
+// Khởi chạy
 const PORT = process.env.PORT || 3000;
-
-mongoose.connect(uri)
+mongoose.connect(process.env.MONGO_URI)
     .then(() => {
-        console.log('✅ Đã kết nối MongoDB');
-
-        app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Server chạy cổng: ${PORT}`);
-        });
+        console.log('✅ MongoDB Connected');
+        app.listen(PORT, () => console.log(`🚀 http://localhost:${PORT}`));
     })
-    .catch(err => {
-        console.error('❌ MongoDB lỗi:', err);
-        process.exit(1);
-    });
+    .catch(err => console.error('❌ DB Error:', err));
