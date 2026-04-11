@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+<<<<<<< HEAD
 
 <head>
     <meta charset="UTF-8">
@@ -420,4 +421,244 @@
         </script>
 </body>
 
+=======
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteCute - Ghi Chú Của Bạn</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --primary: #3b82f6; --primary-light: #eff6ff; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Quicksand', sans-serif; background: #f8fafc; display: flex; min-height: 100vh; color: #1e293b; }
+
+        /* ── SIDEBAR ───────────────────────────── */
+        .sidebar {
+            width: 240px; background: white; height: 100vh; position: fixed;
+            padding: 24px 14px; border-right: 1px solid #f1f5f9;
+            display: flex; flex-direction: column; z-index: 10;
+        }
+        .logo {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 28px; font-weight: 700; font-size: 18px; color: var(--primary);
+        }
+        .logo-box {
+            width: 34px; height: 34px; background: var(--primary-light);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+        }
+        .nav-label {
+            font-size: 10px; font-weight: 700; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 1px;
+            padding: 0 10px; margin: 14px 0 6px;
+        }
+        .nav-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 9px 12px; border-radius: 10px; margin-bottom: 2px;
+            text-decoration: none; color: #64748b; font-size: 13.5px; font-weight: 600;
+            transition: all .15s;
+        }
+        .nav-item:hover { background: #f8fafc; color: var(--primary); }
+        .nav-item.active { background: var(--primary-light); color: var(--primary); }
+        .nav-left { display: flex; align-items: center; gap: 8px; }
+        .badge {
+            background: #e2e8f0; color: #64748b;
+            padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 700;
+        }
+        .active .badge { background: #bfdbfe; color: #1d4ed8; }
+
+        /* ── MAIN ──────────────────────────────── */
+        .main { margin-left: 240px; padding: 32px 36px; width: calc(100% - 240px); min-height: 100vh; }
+
+        /* ── TOPBAR ────────────────────────────── */
+        .topbar { display: flex; gap: 10px; margin-bottom: 22px; align-items: center; }
+        .search-wrap { flex: 1; position: relative; }
+        .search-wrap input {
+            width: 100%; padding: 10px 40px 10px 16px;
+            border: 1px solid #e2e8f0; border-radius: 12px;
+            font-family: inherit; font-size: 14px; background: white;
+            transition: .2s; outline: none; color: #1e293b;
+        }
+        .search-wrap input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+        .search-btn {
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer; color: #94a3b8;
+            padding: 4px; display: flex; align-items: center;
+        }
+
+        /* ── STATS ─────────────────────────────── */
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+        .stat-card { background: white; border: 1px solid #f1f5f9; border-radius: 14px; padding: 14px 18px; }
+        .stat-num { font-size: 22px; font-weight: 700; }
+        .stat-label { font-size: 11px; color: #94a3b8; margin-top: 3px; font-weight: 600; }
+
+        /* ── FORM ──────────────────────────────── */
+        .form-box { background: white; border: 1px solid #f1f5f9; border-radius: 16px; padding: 20px; margin-bottom: 24px; }
+        .form-row { display: grid; grid-template-columns: 1fr 170px; gap: 12px; margin-bottom: 12px; }
+        .form-box input, .form-box select, .form-box textarea {
+            width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 10px;
+            font-family: inherit; font-size: 14px; background: #f8fafc; outline: none; transition: .2s;
+        }
+        .btn-add { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 700; transition: 0.2s; }
+        .btn-add:hover { background: #2563eb; }
+
+        /* ── NOTES GRID ────────────────────────── */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+        .card { background: white; border: 1px solid #f1f5f9; border-radius: 16px; padding: 18px; transition: .2s; position: relative; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .pinned-card { border-left: 4px solid #f59e0b; }
+        
+        .tag { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .tag-work { background: #dbeafe; color: #1e40af; }
+        .tag-personal { background: #fce7f3; color: #9d174d; }
+        .tag-idea { background: #fef9c3; color: #854d0e; }
+        
+        .card-title { font-weight: 700; margin: 10px 0 5px; }
+        .card-content { color: #64748b; font-size: 13px; line-height: 1.5; white-space: pre-wrap; }
+        .card-footer { display: flex; gap: 10px; margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 10px; }
+        .icon-btn { text-decoration: none; color: #94a3b8; transition: 0.2s; }
+        .icon-btn:hover { color: var(--primary); }
+        .pin-active { color: #f59e0b !important; }
+
+        /* Toast */
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: white; padding: 10px 20px; border-radius: 8px; display: none; z-index: 100; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="logo">
+        <div class="logo-box"><i data-lucide="notebook-pen" size="18"></i></div>
+        NoteCute
+    </div>
+
+		<div class="nav-label">Danh mục</div>
+		<a href="/?cat=Tất cả" class="nav-item <%= currentCat === 'Tất cả' ? 'active' : '' %>">
+			<div class="nav-left"><i data-lucide="layout-grid" size="15"></i> Tất cả</div>
+		</a>
+		<a href="/?cat=Công việc" class="nav-item <%= currentCat === 'Công việc' ? 'active' : '' %>">
+			<div class="nav-left"><i data-lucide="briefcase" size="15"></i> Công việc</div>
+		</a>
+		<a href="/?cat=Cá nhân" class="nav-item <%= currentCat === 'Cá nhân' ? 'active' : '' %>">
+			<div class="nav-left"><i data-lucide="heart" size="15"></i> Cá nhân</div>
+		</a>
+		<a href="/?cat=Ý tưởng" class="nav-item <%= currentCat === 'Ý tưởng' ? 'active' : '' %>">
+			<div class="nav-left"><i data-lucide="lightbulb" size="15"></i> Ý tưởng</div>
+		</a>
+
+		<div class="nav-label">Bộ lọc</div>
+		<a href="/?cat=Đã ghim" class="nav-item <%= currentCat === 'Đã ghim' ? 'active' : '' %>">
+			<div class="nav-left"><i data-lucide="pin" size="15"></i> Đã ghim</div>
+		</a>
+
+    <div class="nav-label" style="margin-top: auto;">Hệ thống</div>
+    <a href="/logout" class="nav-item" style="color: #ef4444;" onclick="return confirm('Bạn muốn đăng xuất à?')">
+        <div class="nav-left"><i data-lucide="log-out" size="15"></i> Đăng xuất</div>
+    </a>
+</div>
+
+<div class="main">
+    <div class="topbar">
+        <form action="/" method="GET" style="flex:1; display:flex; gap:10px;">
+            <div class="search-wrap">
+                <input type="text" name="search" placeholder="Tìm kiếm ghi chú..." value="<%= searchQuery %>">
+                <button type="submit" class="search-btn"><i data-lucide="search" size="16"></i></button>
+            </div>
+            <input type="hidden" name="cat" value="<%= currentCat %>">
+        </form>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-num"><%= counts['Tất cả'] %></div>
+            <div class="stat-label">Ghi chú</div>
+        </div>
+        <div class="stat-card"><div class="stat-num" style="color:#3b82f6"><%= counts['Công việc'] %></div><div class="stat-label">Công việc</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:#ec4899"><%= counts['Cá nhân'] %></div><div class="stat-label">Cá nhân</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:#f59e0b"><%= counts['Ý tưởng'] %></div><div class="stat-label">Ý tưởng</div></div>
+    </div>
+
+    <div class="form-box">
+        <form action="/add" method="POST">
+            <div class="form-row">
+                <input type="text" name="title" placeholder="Tiêu đề..." required>
+                <select name="category">
+                    <option value="Công việc">💼 Công việc</option>
+                    <option value="Cá nhân">🌸 Cá nhân</option>
+                    <option value="Ý tưởng">💡 Ý tưởng</option>
+                </select>
+            </div>
+            <textarea name="content" placeholder="Nội dung ghi chú..." rows="3" required></textarea>
+            <div style="text-align: right; margin-top: 10px;">
+                <button type="submit" class="btn-add">✨ Thêm ghi chú</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="grid">
+        <% if (notes.length === 0) { %>
+            <div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 40px;">
+                <p>Hổng có ghi chú nào hết!</p>
+            </div>
+        <% } %>
+
+        <% notes.forEach(note => { %>
+            <div class="card <%= note.pinned ? 'pinned-card' : '' %>">
+                <span class="tag <%= note.category === 'Công việc' ? 'tag-work' : (note.category === 'Ý tưởng' ? 'tag-idea' : 'tag-personal') %>">
+                    <%= note.category %>
+                </span>
+                <div class="card-title"><%= note.title %></div>
+                <div class="card-content"><%= note.content %></div>
+                <div class="card-footer">
+                    <a href="/pin/<%= note._id %>" class="icon-btn <%= note.pinned ? 'pin-active' : '' %>" title="Ghim">
+                        <i data-lucide="pin" size="14"></i>
+                    </a>
+					<a href="/edit/<%= note._id %>" class="icon-btn" title="Chỉnh sửa" style="color: #3b82f6;">
+        <i data-lucide="pencil" size="14"></i>
+    </a>
+                    <a href="/delete/<%= note._id %>" class="icon-btn" onclick="return confirm('Bạn chắc chắn muốn xóa?')" title="Xóa">
+                        <i data-lucide="trash-2" size="14"></i>
+                    </a>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    lucide.createIcons();
+
+    // Hàm hiện thông báo
+   function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.style.display = "block";
+        setTimeout(() => toast.style.display = "none", 2500);
+    }
+
+   const urlParams = new URLSearchParams(window.location.search);
+		if (urlParams.get('pinned')) {
+			showToast("📌 Đã cập nhật trạng thái ghim!");
+		} else if (urlParams.get('added')) {
+			showToast("✅ Đã thêm thành công!");
+		} else if (urlParams.get('deleted')) {
+			showToast("🗑️ Đã xóa ghi chú!");
+		} else if (urlParams.get('edited')) {
+			showToast("✏️ Đã lưu thay đổi!");
+		}	
+    // Giữ focus vào ô tìm kiếm nếu đang search
+    if(urlParams.get('search')) {
+        const input = document.querySelector('input[name="search"]');
+        input.focus();
+        // Đưa con trỏ xuống cuối chữ
+        const val = input.value;
+        input.value = '';
+        input.value = val;
+    }
+</script>
+</body>
+>>>>>>> 8a686893035994e5de0f91eca11824e058e86991
 </html>

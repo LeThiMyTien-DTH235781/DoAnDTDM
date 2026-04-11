@@ -2,11 +2,16 @@
   "name": "app",
   "version": "1.0.0",
   "description": "",
+<<<<<<< HEAD
+=======
+  "keywords": [],
+>>>>>>> 8a686893035994e5de0f91eca11824e058e86991
   "license": "ISC",
   "author": "Mỹ Tiên",
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
+<<<<<<< HEAD
     "test": "note index.js"
   },
   "dependencies": {
@@ -16,5 +21,18 @@
     "express-session": "^1.19.0",
     "mongoose": "^9.4.1",
     "nodemon": "^3.1.14"
+=======
+    "test": "index.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "connect-mongo": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "mongoose": "^8.3.2"
+>>>>>>> 8a686893035994e5de0f91eca11824e058e86991
   }
 }
