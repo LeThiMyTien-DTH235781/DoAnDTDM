@@ -27,7 +27,7 @@ app.use(session({
         maxAge: 3600000 
     }
 }));
-module.exports = app;
+
 
 
 // Middleware bảo mật
@@ -130,3 +130,5 @@ mongoose.connect(process.env.MONGO_URI)
         app.listen(PORT, () => console.log(`🚀 http://localhost:${PORT}`));
     })
     .catch(err => console.error('❌ DB Error:', err));
+	
+module.exports = app;
