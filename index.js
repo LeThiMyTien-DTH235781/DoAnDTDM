@@ -6,7 +6,8 @@ const path = require('path');
 const mongoose = require('mongoose');
 const session = require('express-session');
 
-
+const Note = require('./models/Note'); 
+const indexRouter = require('./routers/index');
 
 // 1. Kết nối MongoDB
 const uri = process.env.MONGO_URI; 

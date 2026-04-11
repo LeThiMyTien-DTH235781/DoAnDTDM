@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
-<<<<<<< HEAD
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập NoteCute</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #3b82f6; /* Màu xanh của nút bấm */
+            --primary-color: #3b82f6;
+            /* Màu xanh của nút bấm */
             --text-color: #1e293b;
             --input-bg: #f1f5f9;
-            --bg-color: #f8fafc; /* Màu nền xám nhạt của toàn màn hình */
+            --bg-color: #f8fafc;
+            /* Màu nền xám nhạt của toàn màn hình */
         }
 
         body {
@@ -21,14 +23,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh; /* Căn giữa form theo chiều dọc */
+            height: 100vh;
+            /* Căn giữa form theo chiều dọc */
         }
 
         .login-card {
             background: white;
             padding: 40px 30px;
-            border-radius: 24px; /* Bo góc lớn mềm mại */
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03); /* Đổ bóng cực nhẹ */
+            border-radius: 24px;
+            /* Bo góc lớn mềm mại */
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+            /* Đổ bóng cực nhẹ */
             width: 360px;
             text-align: center;
         }
@@ -54,10 +59,12 @@
             padding: 14px 16px;
             background-color: var(--input-bg);
             border: 1px solid #e2e8f0;
-            border-radius: 12px; /* Bo góc input */
+            border-radius: 12px;
+            /* Bo góc input */
             font-size: 15px;
             color: var(--text-color);
-            box-sizing: border-box; /* Đảm bảo padding không làm tăng chiều rộng */
+            box-sizing: border-box;
+            /* Đảm bảo padding không làm tăng chiều rộng */
             outline: none;
             transition: 0.2s;
         }
@@ -91,14 +98,14 @@
             background-color: #2563eb;
             transform: translateY(-1px);
         }
-
     </style>
 </head>
+
 <body>
 
     <div class="login-card">
         <div class="brand">
-            <span style="color: #fbbf24;">✨</span> 
+            <span style="color: #fbbf24;">✨</span>
             NoteCute Login
         </div>
 
@@ -107,38 +114,102 @@
                 <input type="text" name="username" placeholder=" " required autocomplete="username">
             </div>
             <div class="form-group">
-                <input type="password" name="password" placeholder="••••••••••••" required autocomplete="current-password">
+                <input type="password" name="password" placeholder="••••••••••••" required
+                    autocomplete="current-password">
             </div>
             <button type="submit" class="btn-login">Vào quản lý ghi chú</button>
         </form>
     </div>
 
-=======
     <title>Đăng nhập NoteCute</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Quicksand', sans-serif; background: #f0f9ff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 25px rgba(59,130,246,0.1); width: 100%; max-width: 350px; text-align: center; }
-        .logo { color: #3b82f6; font-weight: 700; font-size: 24px; margin-bottom: 20px; display: block; }
-        input { width: 100%; padding: 12px 16px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 12px; font-family: inherit; outline: none; box-sizing: border-box; }
-        input:focus { border-color: #3b82f6; }
-        button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: 0.2s; }
-        button:hover { background: #2563eb; }
-        .error { color: #ef4444; font-size: 13px; margin-bottom: 10px; font-weight: 600; }
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: #f0f9ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+        }
+
+        .logo {
+            color: #3b82f6;
+            font-weight: 700;
+            font-size: 24px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 8px 0;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: inherit;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            border-color: #3b82f6;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        .error {
+            color: #ef4444;
+            font-size: 13px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
     </style>
-</head>
-<body>
-    <div class="login-card">
-        <span class="logo">✨ NoteCute Login</span>
-        <% if (error) { %> <div class="error"><%= error %></div> <% } %>
-       <form action="/login" method="POST">
-    <input type="text" name="username" placeholder="Tên đăng nhập" required>
-    
-    <input type="password" name="password" placeholder="Mật khẩu" required>
-    
-    <button type="submit">Vào quản lý ghi chú</button>
-</form>
-    </div>
->>>>>>> 8a686893035994e5de0f91eca11824e058e86991
-</body>
+    </head>
+
+    <body>
+        <div class="login-card">
+            <span class="logo">✨ NoteCute Login</span>
+            <% if (error) { %>
+                <div class="error">
+                    <%= error %>
+                </div>
+                <% } %>
+                    <form action="/login" method="POST">
+                        <input type="text" name="username" placeholder="Tên đăng nhập" required>
+
+                        <input type="password" name="password" placeholder="Mật khẩu" required>
+
+                        <button type="submit">Vào quản lý ghi chú</button>
+                    </form>
+        </div>
+
+    </body>
+
 </html>
