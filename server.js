@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 require('dotenv').config();
 
 const app = express();
@@ -21,6 +22,7 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'ghi-chu-bi-mat',
     resave: false,
     saveUninitialized: true,
+	 store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }), 
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
@@ -122,4 +124,7 @@ app.post('/add', requireLogin, async (req, res) => {
     } catch (err) {
         res.status(500).send('Lỗi khi thêm: ' + err.message);
     }
+});
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server đang chạy tại cổng: ${PORT}`);
 });
