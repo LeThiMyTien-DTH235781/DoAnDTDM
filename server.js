@@ -6,7 +6,7 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
-const Note = require('./models/Note');
+const Note = require('../models/Note');
 
 // --- CẤU HÌNH HỆ THỐNG ---
 app.set('view engine', 'ejs');
@@ -121,13 +121,12 @@ const PORT = process.env.PORT || 3000;
 // Kết nối DB (Vercel sẽ tái sử dụng kết nối này)
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
-        console.log('✅ Đã kết nối tới MongoDB');
-        // Chỉ chạy app.listen nếu KHÔNG phải môi trường Vercel
-        if (process.env.NODE_ENV !== 'production') {
-            app.listen(PORT, () => console.log(`🚀 http://localhost:${PORT}`));
-        }
+        console.log('✅ Connected to MongoDB');
+        // REMOVE the 'if' check. Render NEEDS app.listen to work.
+        app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
     })
     .catch(err => console.error('❌ DB Error:', err));
+
 
 // Dòng này cực kỳ quan trọng cho Vercel
 module.exports = app;
