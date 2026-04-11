@@ -125,5 +125,7 @@ app.post('/edit/:id', checkLogin, async (req, res) => {
     }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`Máy chủ đang chạy tại http://localhost:${PORT}`));
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server đang chạy trên máy chủ ${port}`);
+});
