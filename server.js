@@ -9,7 +9,6 @@ const app = express();
 const Note = require('./models/Note');
 
 // ── MIDDLEWARE ──────────────────────────────────────────
-// ✅ trust proxy phải ở TRÊN CÙNG
 app.set('trust proxy', 1);
 
 app.use(cors());
@@ -22,7 +21,7 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'ghi-chu-bi-mat',
     resave: false,
     saveUninitialized: true,
-	 store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }), 
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI || 'mongodb://tiendth235781:tien123@ac-xqexej9-shard-00-01.ozqyrc3.mongodb.net:27017/app?ssl=true&authSource=admin' }),
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
@@ -40,10 +39,10 @@ const requireLogin = (req, res, next) => {
 };
 
 // ── KẾT NỐI MONGODB ───────────────────────────────────
-const uri = process.env.MONGO_URI || 'mongodb://tiendth235781:tien123@ac-xqexej9-shard-00-01.ozqyrc3.mongodb.net:27017/app?ssl=true&authSource=admin';mongoose.connect(uri)
+const uri = process.env.MONGO_URI || 'mongodb://tiendth235781:tien123@ac-xqexej9-shard-00-01.ozqyrc3.mongodb.net:27017/app?ssl=true&authSource=admin';
+mongoose.connect(uri)
     .then(() => console.log('✅ Đã kết nối thành công tới MongoDB.'))
     .catch(err => console.log('❌ Lỗi kết nối:', err));
-
 
 // Hàm đếm số lượng ghi chú cho Sidebar
 async function getCounts() {
@@ -90,7 +89,6 @@ app.get('/logout', (req, res) => {
 
 // ── ROUTES GHI CHÚ ───────────────────────────────────────
 
-// Trang chủ (Có tìm kiếm & Lọc)
 app.get('/', requireLogin, async (req, res) => {
     try {
         const cat = (req.query.cat || 'Tất cả').trim();
@@ -115,7 +113,6 @@ app.get('/', requireLogin, async (req, res) => {
     }
 });
 
-// Thêm ghi chú
 app.post('/add', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
@@ -125,6 +122,52 @@ app.post('/add', requireLogin, async (req, res) => {
         res.status(500).send('Lỗi khi thêm: ' + err.message);
     }
 });
+
+app.get('/edit/:id', requireLogin, async (req, res) => {
+    try {
+        const note = await Note.findById(req.params.id.trim());
+        const counts = await getCounts();
+        if (!note) return res.redirect('/');
+        res.render('edit', { note, counts, currentCat: 'Tất cả', searchQuery: '' });
+    } catch (err) { res.redirect('/'); }
+});
+
+app.post('/edit/:id', requireLogin, async (req, res) => {
+    try {
+        const { title, content, category } = req.body;
+        await Note.findByIdAndUpdate(req.params.id.trim(), { title, content, category });
+        res.redirect('/?edited=1');
+    } catch (err) { res.status(500).send('Lỗi cập nhật'); }
+});
+
+app.get('/pin/:id', requireLogin, async (req, res) => {
+    try {
+        const id = req.params.id.trim();
+        const note = await Note.findById(id);
+        if (note) {
+            note.pinned = !note.pinned;
+            await note.save();
+        }
+        res.redirect('/?pinned=1');
+    } catch (err) {
+        res.status(500).send('Lỗi ghim');
+    }
+});
+
+app.get('/delete/:id', requireLogin, async (req, res) => {
+    try {
+        const id = req.params.id.trim();
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            await Note.findByIdAndDelete(id);
+        }
+        res.redirect('/?deleted=1');
+    } catch (err) {
+        res.status(500).send('Lỗi khi xóa');
+    }
+});
+
+// ── KHỞI CHẠY SERVER ──────────────────────────────────
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server đang chạy tại cổng: ${PORT}`);
 });
