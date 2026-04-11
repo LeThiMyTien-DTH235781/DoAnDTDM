@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Note = require('../models/Note');
+const Note = require('./models/Note');
 
 // Hàm bổ trợ để lấy số lượng thống kê (tránh lặp code)
 async function getNoteStats() {
