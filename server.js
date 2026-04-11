@@ -20,11 +20,9 @@ app.set('trust proxy', 1);
 app.use(session({
     secret: 'ghi-chu-bi-mat',
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: true, // 🔥 QUAN TRỌNG
     cookie: {
-        secure: false,
-        httpOnly: true,
-        sameSite: 'lax',
+        secure: false,       // 🔥 chạy được cả local + Render
         maxAge: 3600000
     }
 }));
@@ -38,22 +36,24 @@ const requireLogin = (req, res, next) => {
     }
 };
 
+
 // ── KẾT NỐI MONGODB ───────────────────────────────────
-// ── KẾT NỐI MONGODB (SỬA ĐỂ HẾT LỖI CANNOT CALL FIND) ──
-mongoose.set('bufferCommands', false);
+const uri = 'mongodb://tiendth235781:tien123@ac-xqexej9-shard-00-01.ozqyrc3.mongodb.net:27017/app?ssl=true&authSource=admin';
+mongoose.connect(uri)
+    .then(() => console.log('✅ Đã kết nối thành công tới MongoDB.'))
+    .catch(err => console.log('❌ Lỗi kết nối:', err));
 
-const uri = process.env.MONGODB_URI || 'mongodb://tiendth235781:tien123@ac-xqexej9-shard-00-01.ozqyrc3.mongodb.net:27017/app?ssl=true&authSource=admin';
-
-async function connectDB() {
-    try {
-        await mongoose.connect(uri);
-        console.log('✅ Đã kết nối thành công tới MongoDB.');
-    } catch (err) {
-        console.log('❌ Lỗi kết nối:', err.message);
-    }
+// Hàm đếm số lượng ghi chú cho Sidebar
+async function getCounts() {
+    const all = await Note.find();
+    return {
+        'Tất cả':    all.length,
+        'Công việc': all.filter(n => n.category === 'Công việc').length,
+        'Cá nhân':   all.filter(n => n.category === 'Cá nhân').length,
+        'Ý tưởng':   all.filter(n => n.category === 'Ý tưởng').length,
+        'Đã ghim':   all.filter(n => n.pinned).length,
+    };
 }
-
-connectDB(); // Gọi hàm kết nối
 
 // ── ROUTES ĐĂNG NHẬP ────────────────────────────────────
 
@@ -78,13 +78,12 @@ app.get('/logout', (req, res) => {
 
 // ── ROUTES GHI CHÚ ───────────────────────────────────────
 
+// Trang chủ (Có tìm kiếm & Lọc)
 app.get('/', requireLogin, async (req, res) => {
     try {
         const cat = (req.query.cat || 'Tất cả').trim();
         const search = (req.query.search || '').trim();
-        
-        // Đã thêm đầy đủ các key để file EJS của bạn chạy được sidebar
-        const counts = { 'Tất cả': 0, 'Công việc': 0, 'Cá nhân': 0, 'Ý tưởng': 0, 'Đã ghim': 0 }; 
+        const counts = await getCounts();
         
         let query = {};
         if (cat === 'Đã ghim') query.pinned = true;
@@ -98,42 +97,35 @@ app.get('/', requireLogin, async (req, res) => {
         }
 
         const notes = await Note.find(query).sort({ pinned: -1, createdAt: -1 });
-        
+        // Đã sửa lỗi "a'index'" ở đây:
         res.render('index', { notes, counts, currentCat: cat, searchQuery: search });
     } catch (err) { 
         res.status(500).send('Lỗi Server: ' + err.message); 
     }
 });
 
+// Thêm ghi chú
 app.post('/add', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
-        if (!title || !content) return res.status(400).send('Thiếu tiêu đề hoặc nội dung');
-
-        const newNote = new Note({
-            title: title.trim(),
-            content: content.trim(),
-            category: category || 'Cá nhân',
-            pinned: false,
-            createdAt: new Date()
-        });
-
-        await newNote.save();
+        await new Note({ title, content, category }).save();
         res.redirect('/?added=1');
     } catch (err) {
-        res.status(500).send('Lỗi khi thêm ghi chú: ' + err.message);
+        res.status(500).send('Lỗi khi thêm: ' + err.message);
     }
 });
 
+// Trang sửa
 app.get('/edit/:id', requireLogin, async (req, res) => {
     try {
         const note = await Note.findById(req.params.id.trim());
-        const counts = { 'Tất cả': 0, 'Công việc': 0, 'Cá nhân': 0, 'Ý tưởng': 0, 'Đã ghim': 0 };
+        const counts = await getCounts();
         if (!note) return res.redirect('/');
         res.render('edit', { note, counts, currentCat: 'Tất cả', searchQuery: '' });
     } catch (err) { res.redirect('/'); }
 });
 
+// Lưu dữ liệu sửa
 app.post('/edit/:id', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
@@ -142,6 +134,7 @@ app.post('/edit/:id', requireLogin, async (req, res) => {
     } catch (err) { res.status(500).send('Lỗi cập nhật'); }
 });
 
+// Bật/Tắt ghim
 app.get('/pin/:id', requireLogin, async (req, res) => {
     try {
         const id = req.params.id.trim();
@@ -156,6 +149,7 @@ app.get('/pin/:id', requireLogin, async (req, res) => {
     }
 });
 
+// Xóa ghi chú
 app.get('/delete/:id', requireLogin, async (req, res) => {
     try {
         const id = req.params.id.trim();
@@ -168,8 +162,8 @@ app.get('/delete/:id', requireLogin, async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 3000; 
-
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server đang chạy tại: http://0.0.0.0:${PORT}`);
+// KHỞI CHẠY SERVER
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 Server đang chạy tại: http://127.0.0.1:${PORT}`);
 });
