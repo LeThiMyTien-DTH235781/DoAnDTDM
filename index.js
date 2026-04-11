@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -6,7 +8,7 @@ const session = require('express-session');
 const Note = require('./models/note'); 
 
 // 1. Kết nối MongoDB
-const uri = 'mongodb://admin:123@ac-1dt9syp-shard-00-01.r0ceq3z.mongodb.net:27017/app?ssl=true&authSource=admin';
+const uri = process.env.MONGO_URI; 
 mongoose.connect(uri)
     .then(() => console.log('Đã kết nối thành công tới MongoDB.'))
     .catch(err => console.log(err));
@@ -18,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
-    secret: 'NoteCuteSecret',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true
 }));
