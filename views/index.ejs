@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteCute - Dashboard</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --pink: #ec4899;
+            --yellow: #eab308;
+            --sidebar-width: 260px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            margin: 0;
+            display: flex;
+        }
+
+        .content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 40px;
+            min-height: 100vh;
+            transition: 0.3s;
+        }
+
+        /* STATS BAR */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            font-size: 24px;
+            color: #1e293b;
+        }
+
+        .stat-card p {
+            margin: 5px 0 0;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        /* SEARCH CONTAINER */
+        .search-container {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        #clearSearch {
+            position: absolute;
+            right: 15px;
+            cursor: pointer;
+            color: #94a3b8;
+            font-size: 20px;
+            display: none;
+        }
+
+        /* INPUT SECTION */
+        .input-section {
+            background: white;
+            padding: 30px;
+            border-radius: 24px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .input-section input,
+        .input-section textarea,
+        .input-section select {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .btn-add {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* NOTE GRID */
+        .note-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .note-card {
+            background: white;
+            padding: 25px;
+            border-radius: 24px;
+            border-left: 8px solid;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: 0.3s;
+        }
+
+        .note-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .note-work {
+            border-left-color: var(--primary);
+        }
+
+        .note-personal {
+            border-left-color: var(--pink);
+        }
+
+        .note-idea {
+            border-left-color: var(--yellow);
+        }
+
+        .pin-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            text-decoration: none;
+            font-size: 20px;
+        }
+
+        .not-pinned {
+            opacity: 0.3;
+            filter: grayscale(1);
+        }
+
+        /* MODAL */
+        /* MODAL CHỈNH SỬA - GIAO DIỆN XỊN XÒ */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            /* Nền tối nhẹ */
+            backdrop-filter: blur(8px);
+            /* Làm mờ hậu cảnh cực đẹp */
+            display: none;
+            /* Ẩn mặc định */
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: all 0.3s ease;
+        }
+
+        .modal-card {
+            background: white;
+            width: 450px;
+            padding: 35px;
+            border-radius: 30px;
+            /* Bo góc tròn hơn */
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            animation: slideUp 0.4s ease-out;
+            /* Hiệu ứng hiện hình */
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-card h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 22px;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        /* Tùy chỉnh các input trong modal cho đẹp */
+        .modal-card input,
+        .modal-card textarea,
+        .modal-card select {
+            width: 100%;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 14px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            outline: none;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: 0.2s;
+        }
+
+        .modal-card input:focus,
+        .modal-card textarea:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .btn-save {
+            flex: 2;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .btn-save:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        .btn-cancel {
+            flex: 1;
+            background: #f1f5f9;
+            color: #64748b;
+            border: none;
+            padding: 14px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('navbar') %>
+
+        <div class="content">
+            <div style="margin-bottom: 30px;">
+                <form action="/" method="GET" style="display: flex; gap: 12px; align-items: center;">
+                    <div class="search-container">
+                        <input type="text" name="search" id="searchInput" placeholder="Tìm kiếm ghi chú của bạn..."
+                            value="<%= (typeof searchKey !== 'undefined' && !['Công việc','Cá nhân','Ý tưởng','Danh sách đã ghim'].includes(searchKey)) ? searchKey : '' %>"
+                            style="width: 100%; padding: 14px; border-radius: 14px; border: 1px solid #e2e8f0; outline: none;">
+                        <span id="clearSearch">&times;</span>
+                    </div>
+                    <button type="submit" class="btn-add">🔍 Tìm kiếm</button>
+                </form>
+            </div>
+
+            <div class="stats-bar">
+                <a href="/" style="text-decoration: none;">
+                    <div class="stat-card">
+                        <h3>
+                            <%= stats.total %>
+                        </h3>
+                        <p>Tổng số</p>
+                    </div>
+                </a>
+
+                <a href="/category/work" style="text-decoration: none;">
+                    <div class="stat-card">
+                        <h3 style="color: var(--primary);">
+                            <%= stats.work %>
+                        </h3>
+                        <p>Công việc</p>
+                    </div>
+                </a>
+
+                <a href="/category/personal" style="text-decoration: none;">
+                    <div class="stat-card">
+                        <h3 style="color: var(--pink);">
+                            <%= stats.personal %>
+                        </h3>
+                        <p>Cá nhân</p>
+                    </div>
+                </a>
+
+                <a href="/category/idea" style="text-decoration: none;">
+                    <div class="stat-card">
+                        <h3 style="color: var(--yellow);">
+                            <%= stats.idea %>
+                        </h3>
+                        <p>Ý tưởng</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="input-section">
+                <form action="/add-note" method="POST">
+                    <input name="title" placeholder="Tiêu đề..." required>
+                    <textarea name="content" rows="3" placeholder="Bạn đang nghĩ gì..." required></textarea>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <select name="category" style="width: auto; margin-bottom: 0;">
+                            <option value="Công việc">Công việc</option>
+                            <option value="Cá nhân">Cá nhân</option>
+                            <option value="Ý tưởng">Ý tưởng</option>
+                        </select>
+                        <button type="submit" class="btn-add">✨ Thêm ngay</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="note-grid">
+                <% notes.forEach(note=> {
+                    let typeClass = (note.category === 'Cá nhân') ? 'personal' : (note.category === 'Ý tưởng' ? 'idea' :
+                    'work');
+                    %>
+                    <div class="note-card note-<%= typeClass %>">
+                        <a href="/pin/<%= note._id %>" class="pin-btn <%= note.isPinned ? '' : 'not-pinned' %>">
+                            <%= note.isPinned ? '📌' : '📍' %>
+                        </a>
+                        <span
+                            style="font-size: 11px; padding: 6px 14px; border-radius: 100px; font-weight: 700; background: #f1f5f9;">
+                            <%= note.category %>
+                        </span>
+                        <h3 style="margin: 15px 0 10px;">
+                            <%= note.title %>
+                        </h3>
+                        <p style="color: #475569; font-size: 14px; line-height: 1.5;">
+                            <%= note.content %>
+                        </p>
+                        <div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
+                            <button class="btn-add"
+                                style="padding: 8px 15px; background: none; color: #64748b; border: 1px solid #e2e8f0;"
+                                onclick="openEditModal('<%= note._id %>', '<%= note.title %>', '<%= note.content %>', '<%= note.category %>')">✏️
+                                Sửa</button>
+                            <a href="/delete/<%= note._id %>" onclick="return confirm('Xóa nhé?')"
+                                style="margin-left: 10px; color: #ef4444; text-decoration: none; font-size: 14px;">🗑️
+                                Xóa</a>
+                        </div>
+                    </div>
+                    <% }) %>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="editModal">
+            <div class="modal-card">
+                <h2>✏️ Chỉnh sửa ghi chú</h2>
+                <form id="editForm" method="POST">
+                    <input type="text" name="title" id="editTitle" placeholder="Tiêu đề mới..." required>
+                    <textarea name="content" id="editContent" rows="5" placeholder="Nội dung mới..."
+                        required></textarea>
+
+                    <label style="font-size: 13px; color: #94a3b8; margin-left: 5px;">Danh mục:</label>
+                    <select name="category" id="editCategory">
+                        <option value="Công việc">💼 Công việc</option>
+                        <option value="Cá nhân">🌸 Cá nhân</option>
+                        <option value="Ý tưởng">💡 Ý tưởng</option>
+                    </select>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel" onclick="closeModal()">Hủy</button>
+                        <button type="submit" class="btn-save">Cập nhật ngay</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            // Xử lý Search và Nút X
+            const searchInput = document.getElementById('searchInput');
+            const clearSearch = document.getElementById('clearSearch');
+
+            function toggleClearBtn() {
+                clearSearch.style.display = searchInput.value.trim() !== "" ? "block" : "none";
+            }
+
+            searchInput.addEventListener('input', toggleClearBtn);
+            window.addEventListener('DOMContentLoaded', toggleClearBtn);
+
+            clearSearch.addEventListener('click', () => {
+                searchInput.value = '';
+                window.location.href = '/';
+            });
+
+            // Xử lý Modal
+            function openEditModal(id, title, content, category) {
+                document.getElementById('editForm').action = '/edit/' + id;
+                document.getElementById('editTitle').value = title;
+                document.getElementById('editContent').value = content;
+                document.getElementById('editCategory').value = category;
+                document.getElementById('editModal').style.display = 'flex';
+            }
+
+            function closeModal() { document.getElementById('editModal').style.display = 'none'; }
+        </script>
+</body>
+
+</html>

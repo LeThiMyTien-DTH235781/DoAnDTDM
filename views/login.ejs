@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập NoteCute</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3b82f6; /* Màu xanh của nút bấm */
+            --text-color: #1e293b;
+            --input-bg: #f1f5f9;
+            --bg-color: #f8fafc; /* Màu nền xám nhạt của toàn màn hình */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Căn giữa form theo chiều dọc */
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 24px; /* Bo góc lớn mềm mại */
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03); /* Đổ bóng cực nhẹ */
+            width: 360px;
+            text-align: center;
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            background-color: var(--input-bg);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px; /* Bo góc input */
+            font-size: 15px;
+            color: var(--text-color);
+            box-sizing: border-box; /* Đảm bảo padding không làm tăng chiều rộng */
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Định dạng placeholder màu xám nhạt */
+        input::placeholder {
+            color: #94a3b8;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.2s;
+        }
+
+        .btn-login:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="brand">
+            <span style="color: #fbbf24;">✨</span> 
+            NoteCute Login
+        </div>
+
+        <form action="/login" method="POST">
+            <div class="form-group">
+                <input type="text" name="username" placeholder=" " required autocomplete="username">
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" placeholder="••••••••••••" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn-login">Vào quản lý ghi chú</button>
+        </form>
+    </div>
+
+</body>
+</html>

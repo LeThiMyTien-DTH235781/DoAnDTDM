@@ -1,0 +1,13 @@
+<script>
+    console.log("NoteCute App Loaded!");
+    
+    // Logic xử lý đơn giản khi nhấn nút thêm
+    document.querySelector('.btn-add').addEventListener('click', function() {
+        const title = document.querySelector('input[type="text"]').value;
+        if(!title) {
+            alert("Vui lòng nhập tiêu đề ghi chú!");
+        } else {
+            console.log("Đang thêm ghi chú: " + title);
+        }
+    });
+</script>
