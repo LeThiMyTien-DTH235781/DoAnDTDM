@@ -74,12 +74,15 @@ app.post('/login', (req, res) => {
     const { username, password } = req.body;
     if (username === 'admin' && password === '123456') {
         req.session.loggedIn = true;
-        res.redirect('/');
+        // ✅ Save session trước khi redirect
+        req.session.save((err) => {
+            if (err) console.log(err);
+            res.redirect('/');
+        });
     } else {
         res.render('login', { error: 'Sai tài khoản hoặc mật khẩu!' });
     }
 });
-
 app.get('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/login');
@@ -115,7 +118,11 @@ app.post('/add', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
         await new Note({ title, content, category }).save();
-        res.redirect('/?added=1');
+        // ✅ Save session trước khi redirect
+        req.session.save((err) => {
+            if (err) console.log(err);
+            res.redirect('/?added=1');
+        });
     } catch (err) {
         res.status(500).send('Lỗi khi thêm: ' + err.message);
     }
