@@ -106,6 +106,10 @@ app.get('/', requireLogin, async (req, res) => {
     }
 });
 
+app.get('/add', requireLogin, (req, res) => {
+    res.render('add'); // tạo file views/add.ejs
+});
+
 app.post('/add', requireLogin, async (req, res) => {
     try {
         const { title, content, category } = req.body;
